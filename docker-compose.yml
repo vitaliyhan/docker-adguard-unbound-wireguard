@@ -5,7 +5,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 10.2.0.0/24
+        - subnet: 10.2.1.0/24
 
 services:
   unbound:
@@ -17,7 +17,7 @@ services:
       - "./unbound:/opt/unbound/etc/unbound/"
     networks:
       private_network:
-        ipv4_address: 10.2.0.200
+        ipv4_address: 10.2.1.200
 
   wireguard:
     depends_on: [unbound, adguard]
@@ -29,13 +29,11 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/London # Change to your timezone
+      - TZ=Europe/London
       - SERVERPORT=51820
-      #- SERVERURL=my.ddns.net #optional - For use with DDNS (Uncomment to use)
-      - PEERS=1 # How many peers to generate for you (clients)
-      - PEERDNS=10.2.0.100 # Set it to point to adguard home
+      - PEERS=1
+      - PEERDNS=10.2.1.100
       - INTERNAL_SUBNET=10.6.0.0
-      #- ALLOWEDIPS=10.2.0.0/24 # optional - split tunnel for web panel and DNS traffic only
     volumes:
       - ./wireguard:/config
       - /lib/modules:/lib/modules
@@ -46,7 +44,7 @@ services:
     restart: unless-stopped
     networks:
       private_network:
-        ipv4_address: 10.2.0.3
+        ipv4_address: 10.2.1.3
 
   adguard:
     depends_on: [unbound]
@@ -54,10 +52,9 @@ services:
     image: adguard/adguardhome
     restart: unless-stopped
     hostname: adguard
-    # Volumes store your data between container upgrades
     volumes:
       - "./adguard/opt-adguard-work:/opt/adguardhome/work"
       - "./adguard/opt-adguard-conf:/opt/adguardhome/conf"
     networks:
       private_network:
-        ipv4_address: 10.2.0.100
+        ipv4_address: 10.2.1.100
